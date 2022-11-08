@@ -1,0 +1,19 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+      "axis": {"grid": true, "gridOpacity": 0.45, "tickOpacity": 0.5, "tickBand": "extent"}
+    },
+    "data": {"url": "references.csv"},
+    "mark": {"type": "rect", "clip": true, "tooltip": {"content": "data"}},
+    "encoding": {
+      "y": {"field": "Father",
+      "title": "Apostolic Father",
+      "axis": {"titlePadding": 10}},
+      "x": {"field": "Book", "type": "ordinal", "axis": {"titlePadding": 10}, "scale": {"domain":["Matt", "Mark", "Luke", "John", "Acts", "Rom", "1 Cor", "2 Cor", "Gal", "Eph", "Phil", "Col", "1 Thess", "2 Thess", "1 Tim", "2 Tim", "Tit", "Philem", "Heb", "James", "1 Pet", "2 Pet", "1 John", "2 John", "3 John", "Jude", "Rev"]}},
+      "color": {"aggregate": "sum", "field": "Count", "title": "Number of Citations", "scale": {"scheme": "lighttealblue"}},
+      "tooltip": [
+        {"field": "Count", "aggregate":"sum", "type": "quantitative", "title": "Number of Citations"}
+      
+      ]
+    }
+}

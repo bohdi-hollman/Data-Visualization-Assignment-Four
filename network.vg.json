@@ -1,0 +1,132 @@
+{
+    "$schema": "https://vega.github.io/schema/vega/v5.json",
+    "width": 700,
+    "height": 500,
+    "padding": 0,
+    "title": "Fg. 1: Apostolic Father References to New Testament Books",
+    "autosize": "none",
+    "scale": "range", 
+    "signals": [
+      {"name": "cx", "update": "width / 2"},
+      {"name": "cy", "update": "height / 2"},
+      {"name": "Static View", "value": true, "bind": {"input": "checkbox"}},
+      {
+        "name": "fix",
+        "value": 0,
+        "on": [
+          {
+            "events": "symbol:mouseout[!event.buttons], window:mouseup",
+            "update": "0"
+          },
+          {"events": "symbol:mouseover", "update": "fix || 1"},
+          {
+            "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
+            "update": "2",
+            "force": true
+          }
+        ]
+      },
+      {
+        "name": "node",
+        "value": null,
+        "on": [
+          {"events": "symbol:mouseover", "update": "fix === 1 ? item() : node"}
+        ]
+      },
+      {
+        "name": "restart",
+        "value": false,
+        "on": [{"events": {"signal": "fix"}, "update": "fix > 1"}]
+      }
+    ],
+    "data": [
+      {
+        "name": "node-data",
+        "url": "patristics.json",
+        "format": {"type": "json", "property": "nodes"}
+      },
+      {
+        "name": "link-data",
+        "url": "patristics.json",
+        "format": {"type": "json", "property": "links"}
+      }
+    ],
+    "scales": [
+      {"name": "color", "type": "ordinal", "range": {"scheme": "set3"}}
+    ],
+    "marks": [
+      {
+        "name": "nodes",
+        "type": "symbol",
+        "zindex": 1,
+        "from": {"data": "node-data"},
+        "on": [
+          {
+            "trigger": "fix",
+            "modify": "node",
+            "values": "fix === 1 ? {fx:node.x, fy:node.y} : {fx:x(), fy:y()}"
+          },
+          {"trigger": "!fix", "modify": "node", "values": "{fx: null, fy: null}"}
+        ],
+        "encode": {
+          "enter": {
+            "fill": {"scale": "color", "field": "group"},
+            "stroke": {"value": "black"},
+            "tooltip": {
+                "signal": "{title: datum.name, 'References by Ignatius': datum.ig_ref, 'References by Polycarp': datum.poly_ref, 'References by Clement': datum.clem_ref, 'References by Hermas': datum.herm_ref, 'References by Pseudo-Barnabas': datum.psuedo_ref, 'References by Papias': datum.pap_ref}"
+              }
+          },
+          "update": {
+            "size": {"signal": "2 * 10 * 10"},
+            "cursor": {"value": "pointer"}
+          }
+        },
+        "transform": [
+          {
+            "type": "force",
+            "iterations": 300,
+            "restart": {"signal": "restart"},
+            "static": {"signal": "Static View"},
+            "forces": [
+              {"force": "center", "x": {"signal": "cx"}, "y": {"signal": "cy"}},
+              {"force": "collide", "radius": {"signal": "15"}},
+              {"force": "nbody", "strength": {"signal": ""}},
+              {
+                "force": "link",
+                "links": "link-data",
+                "distance": {"signal": "200"}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "path",
+        "from": {"data": "link-data"},
+        "interactive": false,
+        "encode": {
+          "update": {"stroke": {"value": "#ccc"}, "strokeWidth": {"value": 0.5}}
+        },
+        "transform": [
+          {
+            "type": "linkpath",
+            "shape": "line",
+            "sourceX": "datum.source.x",
+            "sourceY": "datum.source.y",
+            "targetX": "datum.target.x",
+            "targetY": "datum.target.y"
+          }
+        ]
+      }
+    ],
+    "legends": [
+        {
+          "fill": "color",
+          "title": "Authorship Legend",
+          "orient": "none",
+          "encode": {
+            "labels": {"update": {"text": {"field": "value"}}}
+          }
+        }
+      ]
+  }
